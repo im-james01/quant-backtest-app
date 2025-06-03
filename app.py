@@ -54,17 +54,20 @@ if st.button("🔍 전략 실행"):
         # NaN 제거 (모든 지표 계산 후)
         data = data.dropna().copy()
 
+        # 인덱스 정렬을 명시적으로 맞춰줌
+        data = data.loc[:, ~data.columns.duplicated()].copy()
+
         # 전략 시그널: 조건 조합
         data["Signal"] = 0
         condition = (data["Short_MA"] > data["Long_MA"]) & (data["RSI"] < rsi_threshold)
         if macd_enabled:
-            condition &= (data['MACD'] > data['Signal_Line'])
+            condition = condition & (data['MACD'] > data['Signal_Line'])
         if bollinger_enabled:
-            condition &= (data['Close'] < data['BB_Lower'])
+            condition = condition & (data['Close'] < data['BB_Lower'])
         if volume_enabled:
-            condition &= (data['Volume'] > 1.5 * data['Volume_Avg'])
+            condition = condition & (data['Volume'] > 1.5 * data['Volume_Avg'])
         if momentum_enabled:
-            condition &= (data['Momentum_10'] > 0)
+            condition = condition & (data['Momentum_10'] > 0)
 
         data.loc[condition, "Signal"] = 1
         data["Position"] = data["Signal"].diff()
