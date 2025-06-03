@@ -75,7 +75,7 @@ if st.button("🔍 전략 실행"):
             condition = condition & (momentum > 0)
 
         condition = condition.fillna(False)
-        data.loc[condition.index[condition], "Signal"] = 1
+        data.loc[condition[condition].index, "Signal"] = 1
         data["Position"] = data["Signal"].diff()
 
         # 수익률 계산
