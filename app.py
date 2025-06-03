@@ -72,7 +72,7 @@ if st.button("🔍 전략 실행"):
         if momentum_enabled:
             condition &= data['Momentum_10'] > 0
 
-        data.loc[condition.index[condition], "Signal"] = 1
+        data.loc[condition.fillna(False), "Signal"] = 1
         data["Position"] = data["Signal"].diff()
 
         # 수익률 계산
