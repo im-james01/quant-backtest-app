@@ -52,7 +52,7 @@ if st.button("🔍 전략 실행"):
         data['Momentum_10'] = data['Close'].pct_change(periods=10)
 
         # NaN 제거 (모든 지표 계산 후)
-        data.dropna(inplace=True)
+        data = data.dropna().copy()
 
         # 전략 시그널: 조건 조합
         data["Signal"] = 0
