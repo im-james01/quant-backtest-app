@@ -21,7 +21,6 @@ momentum_enabled = st.checkbox("최근 10일 수익률 > 0 포함", value=False)
 if st.button("🔍 전략 실행"):
     try:
         data = yf.download(symbol, start=start_date, end=end_date)
-        data.dropna(inplace=True)
 
         # 이동평균
         data["Short_MA"] = data["Close"].rolling(window=short_window).mean()
@@ -51,6 +50,9 @@ if st.button("🔍 전략 실행"):
 
         # 모멘텀 (10일 수익률)
         data['Momentum_10'] = data['Close'].pct_change(periods=10)
+
+        # NaN 제거 (모든 지표 계산 후)
+        data.dropna(inplace=True)
 
         # 전략 시그널: 조건 조합
         data["Signal"] = 0
@@ -95,9 +97,9 @@ if st.button("🔍 전략 실행"):
             "볼린저 밴드 사용": bollinger_enabled,
             "거래량 급증 포함": volume_enabled,
             "모멘텀 조건 포함": momentum_enabled,
-            "시장 누적 수익률": f"{(data["Cumulative Market Return"].iloc[-1] - 1):.2%}",
-            "전략 누적 수익률": f"{(data["Cumulative Strategy Return"].iloc[-1] - 1):.2%}",
-            "최대 낙폭 (MDD)": f"{(data["Cumulative Strategy Return"].cummax() - data["Cumulative Strategy Return"]).max():.2%}",
+            "시장 누적 수익률": f"{(data['Cumulative Market Return'].iloc[-1] - 1):.2%}",
+            "전략 누적 수익률": f"{(data['Cumulative Strategy Return'].iloc[-1] - 1):.2%}",
+            "최대 낙폭 (MDD)": f"{(data['Cumulative Strategy Return'].cummax() - data['Cumulative Strategy Return']).max():.2%}",
         }
 
         st.subheader("전략 요약")
