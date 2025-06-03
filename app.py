@@ -59,19 +59,23 @@ if st.button("🔍 전략 실행"):
         condition = (data["Short_MA"] > data["Long_MA"]) & (data["RSI"] < rsi_threshold)
 
         if macd_enabled:
-            condition = condition & (data['MACD'] > data['Signal_Line'])
+            macd, signal = data["MACD"].align(data["Signal_Line"], join="inner")
+            condition = condition & (macd > signal)
 
         if bollinger_enabled:
-            condition = condition & (data['Close'] < data['BB_Lower'])
+            close, lower = data["Close"].align(data["BB_Lower"], join="inner")
+            condition = condition & (close < lower)
 
         if volume_enabled:
-            condition = condition & (data['Volume'] > 1.5 * data['Volume_Avg'])
+            vol, vol_avg = data["Volume"].align(data["Volume_Avg"], join="inner")
+            condition = condition & (vol > 1.5 * vol_avg)
 
         if momentum_enabled:
-            condition = condition & (data['Momentum_10'] > 0)
+            momentum = data["Momentum_10"].reindex(condition.index).fillna(0)
+            condition = condition & (momentum > 0)
 
         condition = condition.fillna(False)
-        data.loc[condition, "Signal"] = 1
+        data.loc[condition.index[condition], "Signal"] = 1
         data["Position"] = data["Signal"].diff()
 
         # 수익률 계산
