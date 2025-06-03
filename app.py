@@ -57,17 +57,28 @@ if st.button("🔍 전략 실행"):
         # 인덱스 정렬을 명시적으로 맞춰줌
         data = data.loc[:, ~data.columns.duplicated()].copy()
 
-        # 전략 시그널: 조건 조합
-        data["Signal"] = 0
-        condition = (data["Short_MA"] > data["Long_MA"]) & (data["RSI"] < rsi_threshold)
-        if macd_enabled:
-            condition = condition & (data['MACD'] > data['Signal_Line'])
-        if bollinger_enabled:
-            condition = condition & (data['Close'] < data['BB_Lower'])
-        if volume_enabled:
-            condition = condition & (data['Volume'] > 1.5 * data['Volume_Avg'])
-        if momentum_enabled:
-            condition = condition & (data['Momentum_10'] > 0)
+# 전략 시그널: 조건 조합
+data["Signal"] = 0
+condition = (data["Short_MA"] > data["Long_MA"]) & (data["RSI"] < rsi_threshold)
+
+if macd_enabled:
+    left, right = data['MACD'].align(data['Signal_Line'], join='inner')
+    condition &= left > right
+
+if bollinger_enabled:
+    left, right = data['Close'].align(data['BB_Lower'], join='inner')
+    condition &= left < right
+
+if volume_enabled:
+    left, right = data['Volume'].align(data['Volume_Avg'], join='inner')
+    condition &= left > 1.5 * right
+
+if momentum_enabled:
+    condition &= data['Momentum_10'] > 0
+
+data.loc[condition, "Signal"] = 1
+data["Position"] = data["Signal"].diff()
+
 
         data.loc[condition, "Signal"] = 1
         data["Position"] = data["Signal"].diff()
