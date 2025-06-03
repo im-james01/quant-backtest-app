@@ -1,3 +1,6 @@
+# NOTE: This app must be run in an environment with Streamlit and required packages pre-installed.
+# micropip is not used here and not needed unless running in Pyodide or restricted environments.
+
 import streamlit as st
 import yfinance as yf
 import pandas as pd
